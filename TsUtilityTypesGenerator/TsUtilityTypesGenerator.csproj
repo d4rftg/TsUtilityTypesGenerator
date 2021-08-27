@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>library</OutputType>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<IsRoslynComponent>true</IsRoslynComponent>
+		<TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackBuildOutputs</TargetsForTfmSpecificContentInPackage>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<IncludeSymbols>false</IncludeSymbols>
+		<SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+		<DevelopmentDependency>true</DevelopmentDependency>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="SoureGenerator.AttributeText.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>SoureGenerator.AttributeText.tt</DependentUpon>
+		</Compile>
+		<Compile Update="Templates\PickTemplate.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>PickTemplate.tt</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="SoureGenerator.AttributeText.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>SoureGenerator.AttributeText.cs</LastGenOutput>
+		</None>
+		<None Update="Templates\PickTemplate.tt">
+			<Generator>TextTemplatingFilePreprocessor</Generator>
+			<LastGenOutput>PickTemplate.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+
+	<Target Name="PackBuildOutputs" DependsOnTargets="SatelliteDllsProjectOutputGroup;DebugSymbolsProjectOutputGroup">
+		<ItemGroup>
+			<TfmSpecificPackageFile Include="$(TargetDir)\*.dll" PackagePath="analyzers\dotnet\cs" />
+			<TfmSpecificPackageFile Include="@(SatelliteDllsProjectOutputGroupOutput->'%(FinalOutputPath)')" PackagePath="analyzers\dotnet\cs\%(SatelliteDllsProjectOutputGroupOutput.Culture)\" />
+		</ItemGroup>
+	</Target>
+
+</Project>
